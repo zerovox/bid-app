@@ -1,3 +1,52 @@
 extend main
 block content
-	p Test
+	script.
+		var round = #{round};
+		$(function() {
+			setInterval(function(){
+				$.ajax({
+					url: '/round',
+					success: function(data) {
+						if (round != +data) {
+							window.location.reload(true);
+						}
+					}
+				});
+			}, 1000);
+		});
+	block bidContent
+	h2 Bid Order
+	ol
+		each player, i in players
+			if (turn == i)
+				li &gt; #{player.name}
+			else
+				li #{player.name}
+	h2 Room Allocation
+	table
+		thead
+			tr
+				td Room
+				td Person
+				td Price
+		tbody
+			each room in rooms
+				tr
+					td #{room.name}
+					td #{room.occupant.name}
+					td #{room.price}
+
+	h2 Bid History
+	table
+		thead
+			tr
+				td Person
+				td Action
+		tbody
+			each bid in bidHistory
+				tr
+					td #{bid.player.name}
+					if bid.type == 'bid'
+						td Bid up #{bid.room.name} to #{bid.price}
+					else
+						td Passed

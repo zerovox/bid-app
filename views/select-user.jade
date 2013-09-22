@@ -1,0 +1,6 @@
+extend main
+block content
+	ul
+		each player, i in players
+			li
+				a(href="/bid/#{i}") #{player.name}

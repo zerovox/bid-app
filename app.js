@@ -3,9 +3,19 @@ var _ = require('underscore')
 var app = express()
 
 var players = _.shuffle([{name : "Tim"}, {name : "Quentin"}, {name : "Ben"}, {name : "Callum"}])
-var rooms = _.shuffle([{name : "1S", price : 250},{name : "1L", price : 250},{name : "2S", price : 250},{name : "2L", price : 250}])
+var rooms = [{name : "1S", price : 250},{name : "1L", price : 250},{name : "2S", price : 250},{name : "2L", price : 250}]
 var bidHistory = []
-var t = 0
+var everything = function (player) {
+	return {
+		players: players,
+		rooms: rooms,
+		bidHistory: bidHistory,
+		turn: turn(),
+		player: player,
+		round: round,
+	}
+}
+var round = 0
 var passes = 0
 
 _.each(players, function(player, i){
@@ -14,7 +24,7 @@ _.each(players, function(player, i){
 })
 
 function turn(){
-	return t % players.length
+	return round % players.length
 }
 
 function moveRooms(player, newRoom){
@@ -32,13 +42,13 @@ function newBid(player, room){
 	_.each(rooms, function(room){
 		room.price += -1
 	})
-	rooms[room].price += 4
+	room.price += 4
 
 	bidHistory.push({
 		type : "bid",
 		player : player,
 		room : room,
-		price : rooms[room].price
+		price : room.price
 	})
 
 	passes = 0
@@ -59,45 +69,47 @@ app.set('view engine', 'jade')
 app.set('views', __dirname + '/views')
 
 app.get('/', function(req, res){
-	var options = ""
-	_.each(players, function(player, index){
-		options += '<a href="bid/'+index+'">'+player.name+'</a><br />'
-	})
-	res.send('Who are you?<br />'+options)
+	res.render('select-user', {players: players})
 })
 
 app.get('/bid/:user', function(req,res){
 	var player = req.params.user;
+	var ev = everything(player)
 	if(passes > 2){
-
-		return res.send()
+		res.render('final', ev)
+		return;
 	} 
 	if(turn() == player){
-		var bidOptions = "It's your turn.<br /><ul>"
-		_.each(rooms, function(room, index){
-			bidOptions += '<li><a href="/bidUp/'+player+'/'+index+'">'+room.name+' : $'+room.price+' -> $'+(room.price+3)+'</a></li>'
-		})
-		bidOptions += "</ul>"
-		res.send(bidOptions)
+		res.render('your-turn', ev)
 	} else {
-		res.render('bid', {})
+		res.render('not-your-turn', ev)
 	}
 })
 
-app.get('/bidUp/:user/:room', function(req,res){
+app.get('/bidUp/:user/:room/:round', function(req,res){
 	var player = req.params.user;
 	var room = req.params.room;
-	if(player == turn()){
-		if(room>=rooms.length){
-			pass(player)
-		} else {
-			newBid(player, room)
-		}
-		t += 1;
+	if(player == turn() && +req.params.round === round && room<rooms.length && room>=0){
+		newBid(players[player], rooms[room])
+		round += 1;
 	}
-
 	res.redirect("/bid/"+player)
+})
 
+app.get('/pass/:user/:round', function(req,res){
+	var player = req.params.user;
+	var room = req.params.room;
+	if(player == turn() && +req.params.round === round){
+		pass(players[player])
+		round += 1;
+	}
+	res.redirect("/bid/"+player)
+})
+
+app.get('/round', function(req, res) {
+	res.writeHead(200, { 'Content-Type': 'text/plain' });
+	res.write(round.toString())
+	res.end()
 })
 
 app.listen(8080)

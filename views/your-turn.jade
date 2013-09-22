@@ -1,0 +1,9 @@
+extend bid
+block bidContent
+	p Your turn, #{players[player].name}
+	ul
+		each room, i in rooms 
+			li
+				a(href='/bidUp/#{player}/#{i}/#{round}') #{room.name}: #{room.price} -&gt; #{room.price+3}
+		li
+			a(href='/pass/#{player}/#{round}') Pass
