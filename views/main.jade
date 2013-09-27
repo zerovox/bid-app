@@ -1,7 +1,15 @@
 doctype 5
 html
 	head
-		script(src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js")
+		link(href="//netdna.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css", rel="stylesheet")
+		style.
+			.table {
+				width: auto;
+			}
+
+		script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js")
+		script(src="http://timeago.yarp.com/jquery.timeago.js")
 	body
-		h1 Bidding
-		block content
+		.container
+			h1 Bidding
+			block content

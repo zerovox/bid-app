@@ -13,33 +13,56 @@ block content
 					}
 				});
 			}, 1000);
+
+			$('abbr.timeago')
+				.each(function () {
+					$(this).text(new Date($(this).text()).toLocaleString())
+				})
+				.timeago();
 		});
 	block bidContent
 	h2 Room Allocation
-	table
+	table.table.table-bordered.table-hover
 		thead
 			tr
-				td Room
-				td Person
-				td Price
+				th(rowspan="2") Room
+				th(rowspan="2") Person
+				th(colspan="3") Weekly Price
+				th(colspan="3") Yearly Price
+			tr
+				th No Stipend
+				th Stipend*
+				th Delta
+				th No Stipend
+				th Stipend*
+				th Delta
 		tbody
 			each room in rooms
 				tr
-					td #{room.name}
+					td(style="font-weight: bold") #{room.name}
 					td #{room.occupant.name}
-					td #{room.price}
+					td &pound;#{room.price}
+					td &pound;#{room.price-104}
+					td &pound;#{room.price-250}
+					td &pound;#{room.price*52}
+					td &pound;#{room.price*52-5400}					
+					td &pound;#{(room.price-250)*52}
+	p * After 40% tax
 
-	h2 Bid History
-	table
+	h2 Current Bid History
+	table.table.table-bordered.table-hover
 		thead
 			tr
-				td Person
-				td Action
+				th Time
+				th Person
+				th Action
 		tbody
 			each bid in bidHistory
 				tr
+					td
+						abbr.timeago(title="#{bid.time}") #{bid.time}
 					td #{bid.player.name}
 					if bid.type == 'bid'
-						td Bid up #{bid.room.name} to #{bid.price}
+						td Bid up #{bid.room.name} to &pound;#{bid.price}
 					else
 						td Passed

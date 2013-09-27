@@ -47,6 +47,10 @@ function turn(){
 	return round % players.length;
 }
 
+function date() {
+	return new Date().toISOString()
+}
+
 function moveRooms(player, newRoom){
 	var oldRoom = player.room
 	var otherPlayer = newRoom.occupant
@@ -67,8 +71,9 @@ function newBid(player, room){
 	bidHistory.push({
 		type : "bid",
 		player : player,
+		time: date(),
 		room : room,
-		price : room.price
+		price : room.price,
 	})
 
 	disallowedToBid = [player.name]
@@ -79,7 +84,8 @@ function newBid(player, room){
 function pass(player){
 	bidHistory.push({
 		type : "pass",
-		player : player
+		player : player,
+		time: date(),
 	})
 	disallowedToBid.push(player.name)
 }
