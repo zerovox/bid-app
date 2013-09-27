@@ -14,14 +14,17 @@ block content
 				});
 			}, 1000);
 
-			$('abbr.timeago')
-				.each(function () {
-					$(this).text(new Date($(this).text()).toLocaleString())
-				})
-				.timeago();
+			$('.price').each(function() {
+				var n = +$(this).text();
+				$(this).html("&pound;" + n.toLocaleString())
+			})
+
+			$('abbr.timeago').each(function () {
+				$(this).text(new Date($(this).text()).toLocaleString())
+			}).timeago();
 		});
 	block bidContent
-	h2 Room Allocation
+	h2 Current Room Allocation
 	table.table.table-bordered.table-hover
 		thead
 			tr
@@ -29,6 +32,8 @@ block content
 				th(rowspan="2") Person
 				th(colspan="3") Weekly Price
 				th(colspan="3") Yearly Price
+				if isTurn
+					th(rowspan="2") Bid
 			tr
 				th No Stipend
 				th Stipend*
@@ -37,19 +42,28 @@ block content
 				th Stipend*
 				th Delta
 		tbody
-			each room in rooms
-				tr
+			each room, i in rooms
+				tr(style=(players[player] === rooms[i].occupant?'color: purple':''))
 					td(style="font-weight: bold") #{room.name}
 					td #{room.occupant.name}
-					td &pound;#{room.price}
-					td &pound;#{room.price-104}
-					td &pound;#{room.price-250}
-					td &pound;#{room.price*52}
-					td &pound;#{room.price*52-5400}					
-					td &pound;#{(room.price-250)*52}
-	p * After 40% tax
+					td(class="price") #{room.price}
+					td(class="price") #{room.price-104}
+					td(class="price") #{room.price-250}
+					td(class="price") #{room.price*52}
+					td(class="price") #{room.price*52-5400}					
+					td(class="price") #{(room.price-250)*52}
+					if isTurn
+						td
+							if players[player] !== rooms[i].occupant
+								a.btn.btn-primary(href='/bidUp/#{player}/#{i}/#{round}') Bid -&gt; <span class="price">#{room.price+3}</span>, <span class="price">#{(room.price+3)*52}</span> 
+							else
+								a.btn.btn-primary(href='/pass/#{player}/#{round}') Pass
+	p * After 40% tax.
+	p Each bid increase the price by <span class="price">3</span>/week which is <span class="price">#{3*52}</span>/year.
+	p Bid on a room to swap rooms with the current occupant. Once 3 people pass, the bidding process ends.
 
-	h2 Current Bid History
+	h2 Bid History
+	p From most recent to least recent.
 	table.table.table-bordered.table-hover
 		thead
 			tr
@@ -63,6 +77,9 @@ block content
 						abbr.timeago(title="#{bid.time}") #{bid.time}
 					td #{bid.player.name}
 					if bid.type == 'bid'
-						td Bid up #{bid.room.name} to &pound;#{bid.price}
+						td Bid up #{bid.room.name} to <span class="price">#{bid.price}</span>
 					else
 						td Passed
+
+	h2 Floorplan
+	img(src="http://i.imgur.com/KqwqgWv.jpg")

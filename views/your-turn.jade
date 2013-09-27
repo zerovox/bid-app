@@ -2,20 +2,3 @@ extend bid
 block bidContent
 	p(style="color: green") Your turn, #{players[player].name}.
 	p Any of #{allowedToBid} can bid.
-	table.table.table-bordered.table-hover
-		thead
-			tr
-				th Room
-				th Price Change
-				th Price Change (yr)
-				th Bid
-		tbody
-		each room, i in rooms 
-			tr
-				td #{room.name}
-				td &pound;#{room.price} -&gt; &pound;#{room.price+3}
-				td &pound;#{room.price*52} -&gt; &pound;#{(room.price+3)*52}
-				td 
-					a.btn.btn-primary(href='/bidUp/#{player}/#{i}/#{round}') Bid
-		
-	a.btn.btn-primary(href='/pass/#{player}/#{round}') Pass

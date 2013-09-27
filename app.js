@@ -106,8 +106,10 @@ app.get('/bid/:user', function(req,res){
 		return;
 	}
 	if(playerIdAllowedToBid(playerId)){
+		ev.isTurn = true
 		res.render('your-turn', ev)
 	} else {
+		ev.isTurn = false
 		res.render('not-your-turn', ev)
 	}
 })
