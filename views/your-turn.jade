@@ -1,6 +1,7 @@
 extend bid
 block bidContent
-	p Your turn, #{players[player].name}
+	p Your turn, #{players[player].name}.
+	p Any of #{allowedToBid} can bid.
 	ul
 		each room, i in rooms 
 			li

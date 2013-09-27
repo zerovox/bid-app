@@ -3,28 +3,48 @@ var _ = require('underscore')
 var app = express()
 
 var players = _.shuffle([{name : "Tim"}, {name : "Quentin"}, {name : "Ben"}, {name : "Callum"}])
+var playerNames = _.map(players, function(p){ return p.name })
 var rooms = [{name : "1S", price : 250},{name : "1L", price : 250},{name : "2S", price : 250},{name : "2L", price : 250}]
 var bidHistory = []
-var everything = function (player) {
+var round = 0
+var disallowedToBid = []
+
+function everything(player) {
 	return {
 		players: players,
 		rooms: rooms,
-		bidHistory: bidHistory,
+		bidHistory: bidHistory.slice(0).reverse(),
 		turn: turn(),
 		player: player,
 		round: round,
+		disallowedToBid: disallowedToBid,
+		allowedToBid: allowedToBid().sort().join(", "),
 	}
 }
-var round = 0
-var passes = 0
 
 _.each(players, function(player, i){
 	player.room = rooms[i]
 	rooms[i].occupant = player
 })
 
+function allowedToBid() {
+	return _.without.apply(this, [playerNames].concat(disallowedToBid));
+}
+
+function playerAllowedToBid(playerName) {
+	return disallowedToBid.indexOf(playerName) === -1;
+}
+
+function playerIdAllowedToBid(playerId) {
+	return playerAllowedToBid(players[playerId].name);
+}
+
+function gameOver() {
+	return disallowedToBid.length == 4;
+}
+
 function turn(){
-	return round % players.length
+	return round % players.length;
 }
 
 function moveRooms(player, newRoom){
@@ -51,7 +71,7 @@ function newBid(player, room){
 		price : room.price
 	})
 
-	passes = 0
+	disallowedToBid = [player.name]
 
 	moveRooms(player, room)
 }
@@ -61,7 +81,7 @@ function pass(player){
 		type : "pass",
 		player : player
 	})
-	passes += 1
+	disallowedToBid.push(player.name)
 }
 
 app.engine('.jade', require('jade').__express)
@@ -73,13 +93,13 @@ app.get('/', function(req, res){
 })
 
 app.get('/bid/:user', function(req,res){
-	var player = req.params.user;
-	var ev = everything(player)
-	if(passes > 2){
+	var playerId = req.params.user;
+	var ev = everything(playerId)
+	if(gameOver()){
 		res.render('final', ev)
 		return;
-	} 
-	if(turn() == player){
+	}
+	if(playerIdAllowedToBid(playerId)){
 		res.render('your-turn', ev)
 	} else {
 		res.render('not-your-turn', ev)
@@ -87,23 +107,23 @@ app.get('/bid/:user', function(req,res){
 })
 
 app.get('/bidUp/:user/:room/:round', function(req,res){
-	var player = req.params.user;
+	var playerId = req.params.user;
 	var room = req.params.room;
-	if(player == turn() && +req.params.round === round && room<rooms.length && room>=0){
-		newBid(players[player], rooms[room])
+	if(playerIdAllowedToBid(playerId) && +req.params.round === round && room<rooms.length && room>=0){
+		newBid(players[playerId], rooms[room])
 		round += 1;
 	}
-	res.redirect("/bid/"+player)
+	res.redirect("/bid/"+playerId)
 })
 
 app.get('/pass/:user/:round', function(req,res){
-	var player = req.params.user;
+	var playerId = req.params.user;
 	var room = req.params.room;
-	if(player == turn() && +req.params.round === round){
-		pass(players[player])
+	if(playerIdAllowedToBid(playerId) && +req.params.round === round){
+		pass(players[playerId])
 		round += 1;
 	}
-	res.redirect("/bid/"+player)
+	res.redirect("/bid/"+playerId)
 })
 
 app.get('/round', function(req, res) {
