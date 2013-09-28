@@ -106,7 +106,7 @@ app.engine('.jade', require('jade').__express)
 app.set('view engine', 'jade')
 app.set('views', __dirname + '/views')
 
-app.get('/', function(req, res){
+app.get('/biddingLogin', function(req, res){
 	res.render('select-user', {players: players})
 })
 
