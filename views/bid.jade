@@ -47,7 +47,7 @@ block content
 				th Delta
 		tbody
 			each room, i in rooms
-				tr(style=(players[player] === rooms[i].occupant?'color: purple':''))
+				tr(class=(players[player] === rooms[i].occupant?'by-player':''))
 					td(style="font-weight: bold") #{room.name}
 					td #{room.occupant.name}
 					td(class="price") #{room.price}
@@ -75,10 +75,10 @@ block content
 				th Time
 				th Person
 				th Action
-				th Ip Address
+				th IP Address
 		tbody
 			each bid in bidHistory
-				tr
+				tr(class=(players[player] === bid.player?'by-player':''))
 					td
 						abbr.timeago(title="#{bid.time}") #{bid.time}
 					td #{bid.player.name}
