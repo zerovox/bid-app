@@ -23,6 +23,8 @@ block content
 				$(this).text(new Date($(this).text()).toLocaleString())
 			}).timeago();
 		});
+	if testing
+		.alert.alert-info <span style='font-weight: bold'>Testing: </span> We're not actually bidding yet, just have a look around.
 	if err
 		.alert.alert-error <span style='font-weight: bold'>Error:</span> #{err}
 	block bidContent
@@ -63,7 +65,7 @@ block content
 	p * After 40% tax.
 	p Each bid increase the price by <span class="price">3</span>/week which is <span class="price">#{3*52}</span>/year.
 	p Bid on a room to swap rooms with the current occupant. Once 3 people pass, the bidding process ends.
-	p The page will autorefresh when there is a change.
+	p The page will autorefresh when there is a change (checks once per second).
 
 	h2 Bid History
 	p From most recent to least recent.
@@ -73,6 +75,7 @@ block content
 				th Time
 				th Person
 				th Action
+				th Ip Address
 		tbody
 			each bid in bidHistory
 				tr
@@ -83,6 +86,8 @@ block content
 						td Bid up #{bid.room.name} to <span class="price">#{bid.price}</span>
 					else
 						td Passed
+					td
+						abbr(title="#{bid.useragent}") #{bid.ip}
 
 	h2 Floorplan
 	img(src="http://i.imgur.com/KqwqgWv.jpg")

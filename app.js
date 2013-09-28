@@ -13,6 +13,8 @@ var errors = {
 		+ 'just before you), so we did nothing.'
 }
 
+var testing = process.argv[3] === 'testing'
+
 function everything(player, err) {
 	return {
 		players: players,
@@ -24,6 +26,7 @@ function everything(player, err) {
 		disallowedToBid: disallowedToBid,
 		allowedToBid: allowedToBid().sort().join(", "),
 		err: err,
+		testing: testing,
 	}
 }
 
@@ -67,7 +70,7 @@ function moveRooms(player, newRoom){
 	oldRoom.occupant = otherPlayer
 }
 
-function newBid(player, room){
+function newBid(player, room, req){
 	_.each(rooms, function(room){
 		room.price += -1
 	})
@@ -79,6 +82,8 @@ function newBid(player, room){
 		time: date(),
 		room : room,
 		price : room.price,
+		ip: req.ip,
+		useragent: req.headers['user-agent'],
 	})
 
 	disallowedToBid = [player.name]
@@ -86,11 +91,13 @@ function newBid(player, room){
 	moveRooms(player, room)
 }
 
-function pass(player){
+function pass(player, req){
 	bidHistory.push({
 		type : "pass",
 		player : player,
 		time: date(),
+		ip: req.ip,
+		useragent: req.headers['user-agent'],
 	})
 	disallowedToBid.push(player.name)
 }
@@ -143,7 +150,7 @@ app.get('/bidUp/:user/:room/:round', function(req,res){
 	var room = req.params.room;
 	checkAndDoStuff(req, res, function() {
 		if (room>=rooms.length || room<0) return;
-		newBid(players[playerId], rooms[room])
+		newBid(players[playerId], rooms[room], req)
 	})
 })
 
@@ -151,7 +158,7 @@ app.get('/pass/:user/:round', function(req,res){
 	var playerId = req.params.user;
 	var room = req.params.room;
 	checkAndDoStuff(req, res, function() {
-		pass(players[playerId])
+		pass(players[playerId], req)
 	})
 })
 
@@ -161,4 +168,4 @@ app.get('/round', function(req, res) {
 	res.end()
 })
 
-app.listen(8080)
+app.listen(+process.argv[2])
