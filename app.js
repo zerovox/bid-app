@@ -8,8 +8,12 @@ var rooms = [{name : "1S", price : 250},{name : "1L", price : 250},{name : "2S",
 var bidHistory = []
 var round = 0
 var disallowedToBid = []
+var errors = {
+	'0':  'Your bid was based on old information (likely someone bid '
+		+ 'just before you), so we did nothing.'
+}
 
-function everything(player) {
+function everything(player, err) {
 	return {
 		players: players,
 		rooms: rooms,
@@ -19,6 +23,7 @@ function everything(player) {
 		round: round,
 		disallowedToBid: disallowedToBid,
 		allowedToBid: allowedToBid().sort().join(", "),
+		err: err,
 	}
 }
 
@@ -100,7 +105,8 @@ app.get('/', function(req, res){
 
 app.get('/bid/:user', function(req,res){
 	var playerId = req.params.user;
-	var ev = everything(playerId)
+	var err = req.query.err;
+	var ev = everything(playerId, errors[err])
 	if(gameOver()){
 		res.render('final', ev)
 		return;
@@ -114,24 +120,39 @@ app.get('/bid/:user', function(req,res){
 	}
 })
 
+function redirectToBid(res, playerId, err) {
+	res.redirect('/bid/'+playerId+(err!==null?'?err='+err:''))
+}
+
+function checkAndDoStuff(req, res, stuffCallback) {
+	var playerId = req.params.user
+	var err = null
+	if(playerIdAllowedToBid(playerId)){
+		if (+req.params.round === round) {
+			stuffCallback()
+			round++;
+		} else {
+			err = 0
+		}
+	}
+	redirectToBid(res, playerId, err)
+}
+
 app.get('/bidUp/:user/:room/:round', function(req,res){
 	var playerId = req.params.user;
 	var room = req.params.room;
-	if(playerIdAllowedToBid(playerId) && +req.params.round === round && room<rooms.length && room>=0){
+	checkAndDoStuff(req, res, function() {
+		if (room>=rooms.length || room<0) return;
 		newBid(players[playerId], rooms[room])
-		round += 1;
-	}
-	res.redirect("/bid/"+playerId)
+	})
 })
 
 app.get('/pass/:user/:round', function(req,res){
 	var playerId = req.params.user;
 	var room = req.params.room;
-	if(playerIdAllowedToBid(playerId) && +req.params.round === round){
+	checkAndDoStuff(req, res, function() {
 		pass(players[playerId])
-		round += 1;
-	}
-	res.redirect("/bid/"+playerId)
+	})
 })
 
 app.get('/round', function(req, res) {

@@ -23,6 +23,8 @@ block content
 				$(this).text(new Date($(this).text()).toLocaleString())
 			}).timeago();
 		});
+	if err
+		.alert.alert-error <span style='font-weight: bold'>Error:</span> #{err}
 	block bidContent
 	h2 Current Room Allocation
 	table.table.table-bordered.table-hover
@@ -61,6 +63,7 @@ block content
 	p * After 40% tax.
 	p Each bid increase the price by <span class="price">3</span>/week which is <span class="price">#{3*52}</span>/year.
 	p Bid on a room to swap rooms with the current occupant. Once 3 people pass, the bidding process ends.
+	p The page will autorefresh when there is a change.
 
 	h2 Bid History
 	p From most recent to least recent.
