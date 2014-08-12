@@ -1,0 +1,8 @@
+{
+  "name" : "bid-app",
+  "dependencies" : {
+    "express" : "4.8.3",
+    "jade" : "1.5.0",
+    "underscore" : "1.6.0"
+  }
+}

@@ -2,7 +2,7 @@ var express = require('express')
 var _ = require('underscore')
 var app = express()
 
-var players = _.shuffle([{name : "Tim"}, {name : "Quentin"}, {name : "Ben"}, {name : "Callum"}])
+var players = _.shuffle([{name : "Tim"}, {name : "Quentin"}, {name : "Dave"}, {name : "Greg"}])
 var playerNames = _.map(players, function(p){ return p.name })
 var rooms = [{name : "1S", price : 250},{name : "1L", price : 250},{name : "2S", price : 250},{name : "2L", price : 250}]
 var bidHistory = []
